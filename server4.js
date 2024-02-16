@@ -11,6 +11,53 @@ const uri = "mongodb://localhost:27017";
 
 var data;
 
+app.post("/deletebook", function(req, res){
+    const client = new MongoClient(uri);
+    async function run() {
+        try {
+            const database = client.db('madang');
+            const books = database.collection('book');
+            var data = req.body;
+            console.log(data)
+            // 조건문
+            const query = { bookid: Number(data.bookid)};
+
+            await books.deleteOne(query);
+            res.send(query);
+
+        } finally {
+            await client.close();
+        }
+    }
+    run();
+});
+
+app.post("/updatebook", function(req, res){
+    const client = new MongoClient(uri);
+    async function run() {
+        try {
+            const database = client.db('madang');
+            const books = database.collection('book');
+            var data = req.body;
+            console.log(data)
+            // 조건문
+            const condition = { bookid: Number(data.bookid)};
+            const query = {$set:{
+                bookname: data.bookname , 
+                price: Number(data.price), 
+                publisher : data.publisher
+            }};
+
+            await books.updateOne(condition, query);
+            res.send(query);
+
+        } finally {
+            await client.close();
+        }
+    }
+    run();
+});
+
 app.post("/insertbook", function(req, res){
     // 클라이언트가 밖에 있으면 에러발생
     const client = new MongoClient(uri);
