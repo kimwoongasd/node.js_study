@@ -1,5 +1,6 @@
 {
   "dependencies": {
-    "express": "^3.4.7"
+    "express": "^3.4.7",
+    "mongodb": "6.3"
   }
 }
