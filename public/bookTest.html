@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script>
+        $(function () {
+            let loadbook = () => {
+                $.ajax({
+                    url: "/listbook",
+                    success: (arr) => {
+                        $.each(arr, function () {
+                            var tr = $("<tr></tr>");
+                            console.log(this)
+                            var td1 = $("<td></td>").html(this.BOOKID);
+                            var td2 = $("<td></td>").html(this.BOOKNAME);
+                            var td3 = $("<td></td>").html(this.PRICE);
+                            var td4 = $("<td></td>").html(this.PUBLISHER);
+
+                            tr.append(td1, td2, td3, td4);
+                            $("#list").append(tr);
+                        })
+                    }
+                });
+            };
+
+            $("#list").on("click", "tr", function() {
+                var tdList = $(this).find("td");
+                
+                $("#bookid").val($(tdList[0]).html());
+                $("#bookname").val($(tdList[1]).html());
+                $("#price").val($(tdList[2]).html());
+                $("#publisher").val($(tdList[3]).html());
+            });
+
+            $("#btn_update").click(() => {
+                var data = $("#f").serializeArray();
+                $.post("/updatebook", data, () => {
+                    $("#list").empty();
+                    $("input").val("");
+                    loadbook();
+                });
+            });
+
+            $("#btn_delete").click( () => {
+                var data = $("#f").serializeArray();
+                $.post("/deletebook", data, () => {
+                    $("#list").empty();
+                    $("input").val("");
+                    loadbook();
+                });
+            });
+
+
+            $("#btn_add").click(() => {
+                var data = $("#f").serializeArray();
+                $.post("/insertbook", data, () => {
+                    $("#list").empty();
+                    loadbook();
+                });
+
+                // var bookid = $("#bookid").val();
+                // var bookname = $("#bookname").val();
+                // var price = $("#price").val();
+                // var publisher = $("#publisher").val();
+                // var data = {bookid:bookid, bookname:bookname, price:price, publisher:publisher};
+                // $.ajax({
+                //     url:"/insertbook",
+                //     data:data,
+                //     success:function(){
+
+                //     }
+                // })
+
+            });
+
+            loadbook();
+        });
+    </script>
+</head>
+
+<body>
+    <h2>도서목록</h2>
+    <hr>
+    <table border="1">
+        <thead>
+            <tr>
+                <td>도서번호</td>
+                <td>도서명</td>
+                <td>가격</td>
+                <td>출판사</td>
+            </tr>
+        </thead>
+        <tbody id="list">
+        </tbody>
+    </table>
+    <hr>
+    <h2>도서 등록</h2>
+    <hr>
+    <!-- <form action="/insertbook" method="post" id="f"> -->
+    <form id="f">
+        <!-- <도서번호 : <input type="text" name="bookid" id="bookid"><br> -->
+        <input type="hidden" name="bookid" id="bookid">
+        도서명 : <input type="text" name="bookname" id="bookname"><br>
+        가격 : <input type="text" name="price" id="price"><br>
+        출판사 : <input type="text" name="publisher" id="publisher"><br>
+        <!-- <input type="submit" value="등록" id="add"> -->
+    </form>
+    <button id="btn_add">등록</button>
+    <button id="btn_update">수정</button>
+    <button id="btn_delete">삭제</button>
+</body>
+
+</html>
