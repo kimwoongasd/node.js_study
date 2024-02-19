@@ -30,6 +30,7 @@ async function insertBook(req){
 
         // 조건문
         query = {
+            
             bookid: bookid,
             bookname: data.bookname,
             price: Number(data.price),
