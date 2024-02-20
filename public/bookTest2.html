@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://unpkg.com/react@^16/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@16.13.0/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6.26.0/babel.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <title>Document</title>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        // 초기화 결정하는 변수
+        var isInit = false;
+        var selRow;
+        class Form extends React.Component{
+            // 기본값
+            state = {
+                BOOKID:"",
+                BOOKNAME:"",
+                PRICE:"",
+                PUBLISHER:""
+            }
+
+            // 등록, 수정 버튼
+            submitForm = (event) => {
+                console.log("등록 눌러짐");
+                if (isInit){
+                    this.state = selRow;
+                    isInit = false;
+                }
+                
+                const url = event.target.getAttribute("url");
+                console.log(url);
+                var data = this.state;
+                console.log(data);
+                const axiosConfig = {
+                    headers:{
+                        "Content-Type":"application/x-www-form-urlencoded"
+                    }
+                }
+                
+                axios.post(url,data,axiosConfig);
+                location.reload();
+                return false;
+            }
+            
+            // 입력창 변화가 있을 경우
+            handleChange = (event) => {
+                if (isInit){
+                    this.setState(selRow);
+                    isInit = false;
+                }
+                
+                const { name, value } = event.target
+                this.setState({
+                    [name]: value,
+                })
+
+                // console.log(name);
+                // console.log(value);
+                // console.log(this.state);
+            }
+
+            render() {
+                const {BOOKID, BOOKNAME, PRICE, PUBLISHER} = this.state
+                return (
+                    <form>
+                        <input type="hidden" name="BOOKID" id="BOOKID" value={BOOKID} onChange={this.handleChange}/><br/>
+                        <label htmlFor="BOOKNAME">도서명</label>
+                        <input type="text" name="BOOKNAME" id="BOOKNAME" value={BOOKNAME} onChange={this.handleChange}/><br/>
+                        <label htmlFor="PRICE">가격</label>
+                        <input type="text" name="PRICE" id="PRICE" value={PRICE} onChange={this.handleChange}/><br/>
+                        <label htmlFor="PUBLISHER">출판사</label>
+                        <input type="text" name="PUBLISHER" id="PUBLISHER" value={PUBLISHER} onChange={this.handleChange}/><br/>
+                        <input type="button" url="/insertBook" value="등록" onClick={this.submitForm}/>
+                        <input type="button" url="/updateBook" value="수정" onClick={this.submitForm}/>
+                        <input type="button" url="/deleteBook" value="삭제" onClick={this.submitForm}/>
+                    </form>
+                );
+            }
+        }
+
+        const TableHeader = () => {
+            return <thead>
+                <tr>
+                    <th>도서번호</th>    
+                    <th>도서명</th>    
+                    <th>가격</th>    
+                    <th>출판사</th>    
+                </tr>    
+            </thead>
+        }
+
+        const TableBody = (props) => {
+            const selectBook = (book) => {
+                selRow = book;
+                isInit = true;
+                console.log("도서선택");
+                console.log(book);
+                document.querySelector("#BOOKID").value = book.BOOKID;
+                document.querySelector("#BOOKNAME").value = book.BOOKNAME;
+                document.querySelector("#PRICE").value = book.PRICE;
+                document.querySelector("#PUBLISHER").value = book.PUBLISHER;
+
+            }
+
+            const rows = props.listData.map((book) => {
+                // tr, td에서 데이터를 전달할 떄 콜백함수를 통해서
+                // 값을 전달해야한다
+                return <tr key={book.BOOKID} onClick={() => selectBook(book)}>
+                    <td>{book.BOOKID}</td>
+                    <td>{book.BOOKNAME}</td>
+                    <td>{book.PRICE}</td>
+                    <td>{book.PUBLISHER}</td>
+                </tr>
+            });
+            return <tbody>{rows}</tbody>
+        }
+
+
+        const Table = (props) => {
+            const listData = props.listData;
+            return <table>
+                <TableHeader/>
+                <TableBody listData={listData}/>
+                </table>
+        }
+
+        // axios를 통해서 ajax 통신
+        // axios.get("서비스명").then(함수)
+        axios.get("/listbook").then((res) => {
+            // console.log(res.data);
+            class App extends React.Component{
+             
+
+                render(){
+                    const list = res.data;
+                    return (<div>
+                        <Form />
+                        <Table listData={list}/>
+                        </div>)
+                }
+            }
+            ReactDOM.render(<App/>, document.getElementById("root"));
+        });       
+    </script>
+</body>
+</html>
